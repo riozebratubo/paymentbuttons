@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Botões de Pagamento</string>
+    <string name="version">1.0.0</string>
+    <string name="select_payment_type">Escolha a modalidade</string>
+    <string name="select_payment_type_subtitle">Veja como você quer pagar</string>
+    <string name="payment_type_credit">Crédito</string>
+    <string name="payment_type_debit">Débito</string>
+    <string name="payment_type_user_choice">Escolha a cada vez</string>
+    <string name="app_about_description">Um aplicativo que deixa você criar botões que são atalhos para realizar pagamentos</string>
+</resources>

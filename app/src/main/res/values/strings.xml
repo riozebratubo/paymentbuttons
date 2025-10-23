@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Payment Buttons</string>
+    <string name="version">1.0.0</string>
+    <string name="select_payment_type">Select Payment Type</string>
+    <string name="select_payment_type_subtitle">Choose how you want to pay</string>
+    <string name="payment_type_credit">Credit</string>
+    <string name="payment_type_debit">Debit</string>
+    <string name="payment_type_user_choice">User Choice</string>
+    <string name="app_about_description">A simple app to manage and organize custom buttons</string>
+</resources>
