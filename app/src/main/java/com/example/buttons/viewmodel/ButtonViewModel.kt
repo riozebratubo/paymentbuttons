@@ -3,6 +3,7 @@ package com.example.buttons.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.buttons.R
 import com.example.buttons.data.AppDatabase
 import com.example.buttons.data.ButtonEntity
 import com.example.buttons.data.ButtonRepository
@@ -57,12 +58,13 @@ class ButtonViewModel(application: Application) : AndroidViewModel(application) 
         val pageDao = database.pageDao()
         repository = ButtonRepository(buttonDao)
         pageRepository = PageRepository(pageDao)
+        val defaultPageName = getApplication<Application>().applicationContext.getString(R.string.page_new_default_page_name)
         
         viewModelScope.launch {
             pageRepository.allPages.collect { pageList ->
                 _pages.value = pageList
                 if (pageList.isEmpty()) {
-                    val defaultPage = PageEntity(id = 0, name = "Page 1", position = 0)
+                    val defaultPage = PageEntity(id = 0, name = defaultPageName, position = 0)
                     val pageId = pageRepository.insertPage(defaultPage)
                     _currentPageId.value = pageId
                 } else if (_currentPageId.value == 1L && pageList.isNotEmpty()) {

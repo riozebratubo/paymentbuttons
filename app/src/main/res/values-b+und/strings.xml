@@ -60,4 +60,6 @@
     <string name="drag_to_reorder">Drag to reorder</string>
     <string name="move_up">Move up</string>
     <string name="move_down">Move down</string>
+    <string name="app_about_version_label">Version %1$s</string>
+    <string name="page_new_default_page_name">Page 1</string>
 </resources>

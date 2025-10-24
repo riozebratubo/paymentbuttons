@@ -40,7 +40,10 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Version ${stringResource(R.string.version)}",
+                text = stringResource(
+                    R.string.app_about_version_label,
+                    stringResource(R.string.version)
+                ),
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(32.dp))
