@@ -178,45 +178,58 @@ fun HomeScreen(
                     val currentPage = pages.getOrNull(pageIndex)
                     val pageButtons = currentPage?.let { buttonsByPage[it.id] } ?: emptyList()
                     
-                    if (pageButtons.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(stringResource(R.string.no_buttons_yet), style = MaterialTheme.typography.headlineMedium)
-                                Spacer(modifier = Modifier.height(16.dp))
-                                if (isEditMode) {
-                                    Text(stringResource(R.string.tap_plus_to_add), style = MaterialTheme.typography.bodyMedium)
-                                } else {
-                                    Text(stringResource(R.string.enable_edit_mode), style = MaterialTheme.typography.bodyMedium)
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        if (currentPage != null) {
+                            Text(
+                                text = currentPage.name,
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                        
+                        if (pageButtons.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(stringResource(R.string.no_buttons_yet), style = MaterialTheme.typography.headlineMedium)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    if (isEditMode) {
+                                        Text(stringResource(R.string.tap_plus_to_add), style = MaterialTheme.typography.bodyMedium)
+                                    } else {
+                                        Text(stringResource(R.string.enable_edit_mode), style = MaterialTheme.typography.bodyMedium)
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        if (isEditMode) {
-                            EditableButtonGrid(
-                                buttons = pageButtons,
-                                viewModel = viewModel,
-                                onEditButton = onEditButton,
-                                modifier = Modifier.fillMaxSize()
-                            )
                         } else {
-                            ButtonGrid(
-                                buttons = pageButtons,
-                                onButtonClick = { button ->
-                                    if (button.paymentType == PaymentType.USER_CHOICE) {
-                                        pendingButton = button
-                                        showPaymentDialog = true
-                                    } else {
-                                        val deeplink = buildDeeplink(button, null)
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deeplink))
-                                        context.startActivity(intent)
-                                    }
-                                },
-                                fontSize = buttonFontSize,
-                                modifier = Modifier.fillMaxSize()
-                            )
+                            if (isEditMode) {
+                                EditableButtonGrid(
+                                    buttons = pageButtons,
+                                    viewModel = viewModel,
+                                    onEditButton = onEditButton,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                ButtonGrid(
+                                    buttons = pageButtons,
+                                    onButtonClick = { button ->
+                                        if (button.paymentType == PaymentType.USER_CHOICE) {
+                                            pendingButton = button
+                                            showPaymentDialog = true
+                                        } else {
+                                            val deeplink = buildDeeplink(button, null)
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deeplink))
+                                            context.startActivity(intent)
+                                        }
+                                    },
+                                    fontSize = buttonFontSize,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
                     }
                 }
@@ -265,9 +278,12 @@ fun HomeScreen(
                     pageToDelete = page
                     showDeletePageDialog = true
                 },
+                onUpdatePage = { page ->
+                    viewModel.updatePage(page)
+                },
                 onSelectPage = { page ->
                     scope.launch {
-                        val index = pages.indexOf(page)
+                        val index = pages.indexOfFirst { it.id == page.id }
                         if (index >= 0) {
                             pagerState.animateScrollToPage(index)
                         }
@@ -684,6 +700,7 @@ private fun buildDeeplink(button: ButtonEntity, userSelectedType: PaymentType?):
             amountParam
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PageManagementDialog(
     pages: List<PageEntity>,
@@ -691,10 +708,19 @@ fun PageManagementDialog(
     onDismiss: () -> Unit,
     onAddPage: (String) -> Unit,
     onDeletePage: (PageEntity) -> Unit,
+    onUpdatePage: (PageEntity) -> Unit,
     onSelectPage: (PageEntity) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var pageToEdit by remember { mutableStateOf<PageEntity?>(null) }
+    var editPageName by remember { mutableStateOf("") }
     var newPageName by remember { mutableStateOf("") }
+    var reorderablePages by remember(pages) { mutableStateOf(pages) }
+
+    LaunchedEffect(pages) {
+        reorderablePages = pages
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -704,7 +730,7 @@ fun PageManagementDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                pages.forEach { page ->
+                reorderablePages.forEachIndexed { index, page ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -721,14 +747,56 @@ fun PageManagementDialog(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = "Drag to reorder",
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
                             Text(
                                 text = page.name,
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f)
                             )
                             Row {
+                                if (index > 0) {
+                                    IconButton(onClick = { 
+                                        val newList = reorderablePages.toMutableList()
+                                        val temp = newList[index]
+                                        newList[index] = newList[index - 1]
+                                        newList[index - 1] = temp
+                                        reorderablePages = newList
+                                        // Update positions in database
+                                        newList.forEachIndexed { idx, p ->
+                                            onUpdatePage(p.copy(position = idx))
+                                        }
+                                    }) {
+                                        Icon(Icons.Default.ArrowUpward, contentDescription = "Move up")
+                                    }
+                                }
+                                if (index < reorderablePages.size - 1) {
+                                    IconButton(onClick = { 
+                                        val newList = reorderablePages.toMutableList()
+                                        val temp = newList[index]
+                                        newList[index] = newList[index + 1]
+                                        newList[index + 1] = temp
+                                        reorderablePages = newList
+                                        // Update positions in database
+                                        newList.forEachIndexed { idx, p ->
+                                            onUpdatePage(p.copy(position = idx))
+                                        }
+                                    }) {
+                                        Icon(Icons.Default.ArrowDownward, contentDescription = "Move down")
+                                    }
+                                }
                                 IconButton(onClick = { onSelectPage(page) }) {
                                     Icon(Icons.Default.Check, contentDescription = stringResource(R.string.edit))
+                                }
+                                IconButton(onClick = { 
+                                    pageToEdit = page
+                                    editPageName = page.name
+                                    showEditDialog = true
+                                }) {
+                                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_page))
                                 }
                                 if (pages.size > 1) {
                                     IconButton(onClick = { onDeletePage(page) }) {
@@ -787,6 +855,52 @@ fun PageManagementDialog(
                 TextButton(onClick = { 
                     showAddDialog = false
                     newPageName = ""
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showEditDialog && pageToEdit != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                showEditDialog = false
+                pageToEdit = null
+                editPageName = ""
+            },
+            title = { Text(stringResource(R.string.edit_page)) },
+            text = {
+                OutlinedTextField(
+                    value = editPageName,
+                    onValueChange = { editPageName = it },
+                    label = { Text(stringResource(R.string.page_name)) },
+                    placeholder = { Text(stringResource(R.string.page_name_hint)) },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (editPageName.isNotBlank()) {
+                            pageToEdit?.let { page ->
+                                onUpdatePage(page.copy(name = editPageName))
+                            }
+                            showEditDialog = false
+                            pageToEdit = null
+                            editPageName = ""
+                        }
+                    },
+                    enabled = editPageName.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.update_page))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showEditDialog = false
+                    pageToEdit = null
+                    editPageName = ""
                 }) {
                     Text(stringResource(R.string.cancel))
                 }
