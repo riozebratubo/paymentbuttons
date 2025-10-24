@@ -60,17 +60,17 @@ fun HomeScreen(
         containerColor = if (wallpaperEnabled) Color.Transparent else MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Buttons") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.menu))
                     }
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text(if (isEditMode) "Exit Edit Mode" else "Edit Buttons") },
+                            text = { Text(stringResource(if (isEditMode) R.string.exit_edit_mode else R.string.edit_buttons)) },
                             onClick = {
                                 viewModel.toggleEditMode()
                                 showMenu = false
@@ -83,7 +83,7 @@ fun HomeScreen(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Settings") },
+                            text = { Text(stringResource(R.string.settings)) },
                             onClick = {
                                 showMenu = false
                                 onNavigateToSettings()
@@ -93,7 +93,7 @@ fun HomeScreen(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("About") },
+                            text = { Text(stringResource(R.string.about)) },
                             onClick = {
                                 showMenu = false
                                 onNavigateToAbout()
@@ -109,7 +109,7 @@ fun HomeScreen(
         floatingActionButton = {
             if (isEditMode) {
                 FloatingActionButton(onClick = { onEditButton(null) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Button")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_button))
                 }
             }
         }
@@ -122,12 +122,12 @@ fun HomeScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("No buttons yet", style = MaterialTheme.typography.headlineMedium)
+                    Text(stringResource(R.string.no_buttons_yet), style = MaterialTheme.typography.headlineMedium)
                     Spacer(modifier = Modifier.height(16.dp))
                     if (isEditMode) {
-                        Text("Tap the + button to add one", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.tap_plus_to_add), style = MaterialTheme.typography.bodyMedium)
                     } else {
-                        Text("Enable edit mode from the menu", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.enable_edit_mode), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -212,25 +212,43 @@ fun EditableButtonGrid(
         }
     )
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        state = state.gridState,
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier
-            .fillMaxSize()
-            .reorderable(state)
-    ) {
-        items(buttons, key = { it.id }) { button ->
-            ReorderableItem(state, key = button.id) { isDragging ->
-                EditableButtonItem(
-                    button = button,
-                    onEdit = { onEditButton(button) },
-                    onDelete = { viewModel.deleteButton(button) },
-                    isDragging = isDragging,
-                    modifier = Modifier.detectReorderAfterLongPress(state)
-                )
+    Column(modifier = modifier.fillMaxSize()) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.rearrange_buttons_message),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(12.dp)
+            )
+        }
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            state = state.gridState,
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .reorderable(state)
+        ) {
+            items(buttons, key = { it.id }) { button ->
+                ReorderableItem(state, key = button.id) { isDragging ->
+                    EditableButtonItem(
+                        button = button,
+                        onEdit = { onEditButton(button) },
+                        onDelete = { viewModel.deleteButton(button) },
+                        isDragging = isDragging,
+                        modifier = Modifier.detectReorderAfterLongPress(state)
+                    )
+                }
             }
         }
     }
@@ -274,6 +292,18 @@ fun ButtonItem(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {
+                if (button.amount != null) {
+                    Text(
+                        text = button.amount,
+                        style = when (button.size) {
+                            ButtonSize.SMALL -> MaterialTheme.typography.titleLarge
+                            ButtonSize.NORMAL -> MaterialTheme.typography.headlineMedium
+                            ButtonSize.BIG -> MaterialTheme.typography.headlineLarge
+                        },
+                        fontSize = (fontSize * 1.5f).sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
                 Text(
                     text = button.title,
                     style = when (button.size) {
@@ -370,6 +400,18 @@ fun EditableButtonItem(
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center
                 ) {
+                    if (button.amount != null) {
+                        Text(
+                            text = button.amount,
+                            color = Color.White,
+                            style = when (button.size) {
+                                ButtonSize.SMALL -> MaterialTheme.typography.titleLarge
+                                ButtonSize.NORMAL -> MaterialTheme.typography.headlineMedium
+                                ButtonSize.BIG -> MaterialTheme.typography.headlineLarge
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
                     Text(
                         text = button.title,
                         color = Color.White,
@@ -431,14 +473,14 @@ fun EditableButtonItem(
                 IconButton(onClick = onEdit) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Edit",
+                        contentDescription = stringResource(R.string.edit),
                         tint = Color.White
                     )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.delete),
                         tint = Color.White
                     )
                 }
@@ -477,7 +519,7 @@ fun PaymentTypeDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

@@ -15,8 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.buttons.R
 import com.example.buttons.data.ButtonEntity
 import com.example.buttons.data.ButtonSize
 import com.example.buttons.data.PaymentType
@@ -43,10 +45,10 @@ fun EditButtonScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (existingButton != null) "Edit Button" else "Add Button") },
+                title = { Text(stringResource(if (existingButton != null) R.string.edit_button_title else R.string.add_button_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -63,29 +65,29 @@ fun EditButtonScreen(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Title") },
-                supportingText = { Text("Main text shown on button") },
+                label = { Text(stringResource(R.string.title_label)) },
+                supportingText = { Text(stringResource(R.string.title_hint)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = subtitle,
                 onValueChange = { subtitle = it },
-                label = { Text("Subtitle (Optional)") },
-                supportingText = { Text("Smaller text below title") },
+                label = { Text(stringResource(R.string.subtitle_label)) },
+                supportingText = { Text(stringResource(R.string.subtitle_hint)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = amount,
                 onValueChange = { amount = it },
-                label = { Text("Amount (Optional)") },
-                supportingText = { Text("Numeric value for payment amount") },
+                label = { Text(stringResource(R.string.amount_label)) },
+                supportingText = { Text(stringResource(R.string.amount_hint)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Text("Number of Parcels: $parcels", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.parcels_label, parcels), style = MaterialTheme.typography.titleSmall)
             Slider(
                 value = parcels.toFloat(),
                 onValueChange = { parcels = it.toInt() },
@@ -94,7 +96,7 @@ fun EditButtonScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Text("Payment Type", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.payment_type_label), style = MaterialTheme.typography.titleSmall)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -102,24 +104,24 @@ fun EditButtonScreen(
                 FilterChip(
                     selected = paymentType == PaymentType.CREDIT,
                     onClick = { paymentType = PaymentType.CREDIT },
-                    label = { Text("Credit") },
+                    label = { Text(stringResource(R.string.payment_type_credit)) },
                     modifier = Modifier.weight(1f)
                 )
                 FilterChip(
                     selected = paymentType == PaymentType.DEBIT,
                     onClick = { paymentType = PaymentType.DEBIT },
-                    label = { Text("Debit") },
+                    label = { Text(stringResource(R.string.payment_type_debit)) },
                     modifier = Modifier.weight(1f)
                 )
                 FilterChip(
                     selected = paymentType == PaymentType.USER_CHOICE,
                     onClick = { paymentType = PaymentType.USER_CHOICE },
-                    label = { Text("User Choice") },
+                    label = { Text(stringResource(R.string.payment_type_user_choice)) },
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            Text("Button Size", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.button_size_label), style = MaterialTheme.typography.titleSmall)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -127,24 +129,24 @@ fun EditButtonScreen(
                 FilterChip(
                     selected = buttonSize == ButtonSize.SMALL,
                     onClick = { buttonSize = ButtonSize.SMALL },
-                    label = { Text("Small") },
+                    label = { Text(stringResource(R.string.size_small)) },
                     modifier = Modifier.weight(1f)
                 )
                 FilterChip(
                     selected = buttonSize == ButtonSize.NORMAL,
                     onClick = { buttonSize = ButtonSize.NORMAL },
-                    label = { Text("Normal") },
+                    label = { Text(stringResource(R.string.size_normal)) },
                     modifier = Modifier.weight(1f)
                 )
                 FilterChip(
                     selected = buttonSize == ButtonSize.BIG,
                     onClick = { buttonSize = ButtonSize.BIG },
-                    label = { Text("Big") },
+                    label = { Text(stringResource(R.string.size_big)) },
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            Text("Button Color", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.button_color_label), style = MaterialTheme.typography.titleSmall)
             ColorPicker(
                 selectedColor = selectedColor,
                 onColorSelected = { selectedColor = it }
@@ -178,7 +180,7 @@ fun EditButtonScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = title.isNotBlank()
             ) {
-                Text(if (existingButton != null) "Update Button" else "Add Button")
+                Text(stringResource(if (existingButton != null) R.string.update_button else R.string.add_button_action))
             }
         }
     }

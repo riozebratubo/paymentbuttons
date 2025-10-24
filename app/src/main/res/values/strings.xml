@@ -8,4 +8,39 @@
     <string name="payment_type_debit">Debit</string>
     <string name="payment_type_user_choice">User Choice</string>
     <string name="app_about_description">A simple app to manage and organize custom buttons</string>
+    
+    <!-- HomeScreen -->
+    <string name="menu">Menu</string>
+    <string name="edit_buttons">Edit Buttons</string>
+    <string name="exit_edit_mode">Exit Edit Mode</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="add_button">Add Button</string>
+    <string name="no_buttons_yet">No buttons yet</string>
+    <string name="tap_plus_to_add">Tap the + button to add one</string>
+    <string name="enable_edit_mode">Enable edit mode from the menu</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="rearrange_buttons_message">You can rearrange the buttons</string>
+    <string name="back">Back</string>
+    
+    <!-- EditButtonScreen -->
+    <string name="edit_button_title">Edit Button</string>
+    <string name="add_button_title">Add Button</string>
+    <string name="title_label">Title</string>
+    <string name="title_hint">Main text shown on button</string>
+    <string name="subtitle_label">Subtitle (Optional)</string>
+    <string name="subtitle_hint">Smaller text below title</string>
+    <string name="amount_label">Amount (Optional)</string>
+    <string name="amount_hint">Numeric value for payment amount</string>
+    <string name="parcels_label">Number of Parcels: %d</string>
+    <string name="payment_type_label">Payment Type</string>
+    <string name="button_size_label">Button Size</string>
+    <string name="size_small">Small</string>
+    <string name="size_normal">Normal</string>
+    <string name="size_big">Big</string>
+    <string name="button_color_label">Button Color</string>
+    <string name="update_button">Update Button</string>
+    <string name="add_button_action">Add Button</string>
 </resources>

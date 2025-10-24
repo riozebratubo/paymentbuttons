@@ -8,4 +8,39 @@
     <string name="payment_type_debit">Débito</string>
     <string name="payment_type_user_choice">Escolha a cada vez</string>
     <string name="app_about_description">Um aplicativo que deixa você criar botões que são atalhos para realizar pagamentos</string>
+    
+    <!-- HomeScreen -->
+    <string name="menu">Menu</string>
+    <string name="edit_buttons">Editar Botões</string>
+    <string name="exit_edit_mode">Sair do Modo de Edição</string>
+    <string name="settings">Configurações</string>
+    <string name="about">Sobre</string>
+    <string name="add_button">Adicionar Botão</string>
+    <string name="no_buttons_yet">Nenhum botão ainda</string>
+    <string name="tap_plus_to_add">Toque no botão + para adicionar um</string>
+    <string name="enable_edit_mode">Ative o modo de edição no menu</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Excluir</string>
+    <string name="cancel">Cancelar</string>
+    <string name="rearrange_buttons_message">Você pode reorganizar os botões</string>
+    <string name="back">Voltar</string>
+    
+    <!-- EditButtonScreen -->
+    <string name="edit_button_title">Editar Botão</string>
+    <string name="add_button_title">Adicionar Botão</string>
+    <string name="title_label">Título</string>
+    <string name="title_hint">Texto principal mostrado no botão</string>
+    <string name="subtitle_label">Subtítulo (Opcional)</string>
+    <string name="subtitle_hint">Texto menor abaixo do título</string>
+    <string name="amount_label">Valor (Opcional)</string>
+    <string name="amount_hint">Valor numérico para o valor do pagamento</string>
+    <string name="parcels_label">Número de Parcelas: %d</string>
+    <string name="payment_type_label">Tipo de Pagamento</string>
+    <string name="button_size_label">Tamanho do Botão</string>
+    <string name="size_small">Pequeno</string>
+    <string name="size_normal">Normal</string>
+    <string name="size_big">Grande</string>
+    <string name="button_color_label">Cor do Botão</string>
+    <string name="update_button">Atualizar Botão</string>
+    <string name="add_button_action">Adicionar Botão</string>
 </resources>
