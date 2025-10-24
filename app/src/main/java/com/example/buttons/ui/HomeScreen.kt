@@ -2,6 +2,7 @@ package com.example.buttons.ui
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -41,10 +43,17 @@ fun HomeScreen(
     val isEditMode by viewModel.isEditMode.collectAsState()
     val buttonFontSize by viewModel.buttonFontSize.collectAsState()
     val wallpaperEnabled by viewModel.wallpaperEnabled.collectAsState()
+    val backgroundColor by viewModel.backgroundColor.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
     var showPaymentDialog by remember { mutableStateOf(false) }
     var pendingButton by remember { mutableStateOf<ButtonEntity?>(null) }
     val context = LocalContext.current
+
+    val bgColor = try {
+        Color(android.graphics.Color.parseColor(backgroundColor))
+    } catch (e: Exception) {
+        MaterialTheme.colorScheme.background
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (wallpaperEnabled) {
@@ -57,7 +66,7 @@ fun HomeScreen(
         }
 
     Scaffold(
-        containerColor = if (wallpaperEnabled) Color.Transparent else MaterialTheme.colorScheme.background,
+        containerColor = if (wallpaperEnabled) Color.Transparent else bgColor,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
@@ -379,10 +388,27 @@ fun EditableButtonItem(
         ButtonSize.BIG -> 160.dp
     }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "shake")
+    val shake by infiniteTransition.animateFloat(
+        initialValue = -2f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(100, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shakeAnimation"
+    )
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
+            .graphicsLayer {
+                if (!isDragging) {
+                    rotationZ = shake * 0.5f
+                    translationX = shake
+                }
+            }
             .background(if (isDragging) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent),
         colors = CardDefaults.cardColors(containerColor = buttonColor),
         shape = RectangleShape

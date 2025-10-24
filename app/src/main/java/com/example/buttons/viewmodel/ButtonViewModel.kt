@@ -33,6 +33,12 @@ class ButtonViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    val backgroundColor: StateFlow<String> = MutableStateFlow(PreferencesManager.DEFAULT_BACKGROUND_COLOR).apply {
+        viewModelScope.launch {
+            preferencesManager.backgroundColor.collect { value = it }
+        }
+    }
+
     init {
         val buttonDao = AppDatabase.getDatabase(application).buttonDao()
         repository = ButtonRepository(buttonDao)
@@ -106,6 +112,12 @@ class ButtonViewModel(application: Application) : AndroidViewModel(application) 
     fun setWallpaperEnabled(enabled: Boolean) {
         viewModelScope.launch {
             preferencesManager.setWallpaperEnabled(enabled)
+        }
+    }
+
+    fun setBackgroundColor(color: String) {
+        viewModelScope.launch {
+            preferencesManager.setBackgroundColor(color)
         }
     }
 }

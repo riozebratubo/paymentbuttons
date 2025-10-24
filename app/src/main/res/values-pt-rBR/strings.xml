@@ -43,4 +43,13 @@
     <string name="button_color_label">Cor do Botão</string>
     <string name="update_button">Atualizar Botão</string>
     <string name="add_button_action">Adicionar Botão</string>
+    
+    <!-- SettingsScreen -->
+    <string name="settings_title">Configurações</string>
+    <string name="button_font_size">Tamanho da Fonte dos Botões</string>
+    <string name="button_font_size_hint">Ajuste o tamanho do texto nos botões da tela inicial</string>
+    <string name="home_background">Fundo da Tela Inicial</string>
+    <string name="home_background_hint">Escolha o estilo de fundo para a tela inicial</string>
+    <string name="background_color">Cor de Fundo</string>
+    <string name="background_wallpaper">Papel de Parede</string>
 </resources>

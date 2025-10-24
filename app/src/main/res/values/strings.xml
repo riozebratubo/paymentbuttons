@@ -43,4 +43,13 @@
     <string name="button_color_label">Button Color</string>
     <string name="update_button">Update Button</string>
     <string name="add_button_action">Add Button</string>
+    
+    <!-- SettingsScreen -->
+    <string name="settings_title">Settings</string>
+    <string name="button_font_size">Button Font Size</string>
+    <string name="button_font_size_hint">Adjust the size of text on buttons in the home screen</string>
+    <string name="home_background">Home Background</string>
+    <string name="home_background_hint">Choose background style for home screen</string>
+    <string name="background_color">Background Color</string>
+    <string name="background_wallpaper">Wallpaper</string>
 </resources>
