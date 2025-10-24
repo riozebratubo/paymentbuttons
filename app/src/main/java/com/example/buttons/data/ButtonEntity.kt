@@ -13,7 +13,8 @@ data class ButtonEntity(
     val paymentType: PaymentType,
     val color: String,
     val size: ButtonSize,
-    val position: Int
+    val position: Int,
+    val amount: String? = null
 )
 
 enum class PaymentType {

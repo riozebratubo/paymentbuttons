@@ -490,7 +490,9 @@ private fun buildDeeplink(button: ButtonEntity, userSelectedType: PaymentType?):
         PaymentType.DEBIT -> "debit"
         PaymentType.USER_CHOICE -> "user_choice"
     }
+    val amountParam = button.amount?.let { "&amount=${Uri.encode(it)}" } ?: ""
     return "$baseUrl?title=${Uri.encode(button.title)}" +
             "&parcels=${button.parcels}" +
-            "&type=$typeParam"
+            "&type=$typeParam" +
+            amountParam
 }

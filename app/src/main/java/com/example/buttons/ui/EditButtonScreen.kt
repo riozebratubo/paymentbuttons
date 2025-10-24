@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.buttons.data.ButtonEntity
 import com.example.buttons.data.ButtonSize
@@ -36,6 +38,7 @@ fun EditButtonScreen(
     var paymentType by remember { mutableStateOf(existingButton?.paymentType ?: PaymentType.CREDIT) }
     var selectedColor by remember { mutableStateOf(existingButton?.color ?: "#6200EE") }
     var buttonSize by remember { mutableStateOf(existingButton?.size ?: ButtonSize.NORMAL) }
+    var amount by remember { mutableStateOf(existingButton?.amount ?: "") }
 
     Scaffold(
         topBar = {
@@ -70,6 +73,15 @@ fun EditButtonScreen(
                 onValueChange = { subtitle = it },
                 label = { Text("Subtitle (Optional)") },
                 supportingText = { Text("Smaller text below title") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { amount = it },
+                label = { Text("Amount (Optional)") },
+                supportingText = { Text("Numeric value for payment amount") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -151,7 +163,8 @@ fun EditButtonScreen(
                             paymentType = paymentType,
                             color = selectedColor,
                             size = buttonSize,
-                            position = existingButton?.position ?: 0
+                            position = existingButton?.position ?: 0,
+                            amount = amount.takeIf { it.isNotBlank() }
                         )
 
                         if (existingButton != null) {
