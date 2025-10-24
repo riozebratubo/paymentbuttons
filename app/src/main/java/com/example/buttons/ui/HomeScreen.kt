@@ -687,17 +687,18 @@ fun PaymentTypeDialog(
 }
 
 private fun buildDeeplink(button: ButtonEntity, userSelectedType: PaymentType?): String {
-    val baseUrl = "https://example.com/payment"
-    val typeParam = when (userSelectedType ?: button.paymentType) {
-        PaymentType.CREDIT -> "credit"
-        PaymentType.DEBIT -> "debit"
-        PaymentType.USER_CHOICE -> "user_choice"
-    }
-    val amountParam = button.amount?.let { "&amount=${Uri.encode(it)}" } ?: ""
-    return "$baseUrl?title=${Uri.encode(button.title)}" +
-            "&parcels=${button.parcels}" +
-            "&type=$typeParam" +
-            amountParam
+//    val baseUrl = "https://example.com/payment"
+//    val typeParam = when (userSelectedType ?: button.paymentType) {
+//        PaymentType.CREDIT -> "credit"
+//        PaymentType.DEBIT -> "debit"
+//        PaymentType.USER_CHOICE -> "user_choice"
+//    }
+//    val amountParam = button.amount?.let { "&amount=${Uri.encode(it)}" } ?: ""
+//    return "$baseUrl?title=${Uri.encode(button.title)}" +
+//            "&parcels=${button.parcels}" +
+//            "&type=$typeParam" +
+//            amountParam
+    return "payment-app://pay?return_scheme=deeplinktest&transaction_type=CREDIT"
 }
 
 @OptIn(ExperimentalFoundationApi::class)
