@@ -65,4 +65,7 @@
     <string name="delete_page_confirm">Tem certeza de que deseja excluir esta página? Todos os botões desta página serão excluídos.</string>
     <string name="confirm">Confirmar</string>
     <string name="page_indicator">Página %1$d de %2$d</string>
+    <string name="drag_to_reorder">Arrastar para reordenar</string>
+    <string name="move_up">Mover para cima</string>
+    <string name="move_down">Mover para baixo</string>
 </resources>

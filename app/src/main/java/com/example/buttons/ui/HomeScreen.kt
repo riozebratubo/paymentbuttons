@@ -749,7 +749,7 @@ fun PageManagementDialog(
                         ) {
                             Icon(
                                 Icons.Default.Menu,
-                                contentDescription = "Drag to reorder",
+                                contentDescription = stringResource(R.string.drag_to_reorder),
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
@@ -770,7 +770,7 @@ fun PageManagementDialog(
                                             onUpdatePage(p.copy(position = idx))
                                         }
                                     }) {
-                                        Icon(Icons.Default.ArrowUpward, contentDescription = "Move up")
+                                        Icon(Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.move_up))
                                     }
                                 }
                                 if (index < reorderablePages.size - 1) {
@@ -785,7 +785,7 @@ fun PageManagementDialog(
                                             onUpdatePage(p.copy(position = idx))
                                         }
                                     }) {
-                                        Icon(Icons.Default.ArrowDownward, contentDescription = "Move down")
+                                        Icon(Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.move_down))
                                     }
                                 }
                                 IconButton(onClick = { onSelectPage(page) }) {
