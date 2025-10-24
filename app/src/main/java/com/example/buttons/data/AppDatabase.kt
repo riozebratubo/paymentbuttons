@@ -6,10 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [ButtonEntity::class], version = 3, exportSchema = false)
+@Database(entities = [ButtonEntity::class, PageEntity::class], version = 4, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun buttonDao(): ButtonDao
+    abstract fun pageDao(): PageDao
 
     companion object {
         @Volatile

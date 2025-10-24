@@ -5,6 +5,10 @@ import kotlinx.coroutines.flow.Flow
 class ButtonRepository(private val buttonDao: ButtonDao) {
     val allButtons: Flow<List<ButtonEntity>> = buttonDao.getAllButtons()
 
+    fun getButtonsByPage(pageId: Long): Flow<List<ButtonEntity>> {
+        return buttonDao.getButtonsByPage(pageId)
+    }
+
     suspend fun getButtonById(id: Long): ButtonEntity? {
         return buttonDao.getButtonById(id)
     }

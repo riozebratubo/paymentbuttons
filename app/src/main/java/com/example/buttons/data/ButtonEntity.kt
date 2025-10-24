@@ -14,7 +14,8 @@ data class ButtonEntity(
     val color: String,
     val size: ButtonSize,
     val position: Int,
-    val amount: String? = null
+    val amount: String? = null,
+    val pageId: Long = 1
 )
 
 enum class PaymentType {

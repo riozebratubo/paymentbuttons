@@ -166,7 +166,8 @@ fun EditButtonScreen(
                             color = selectedColor,
                             size = buttonSize,
                             position = existingButton?.position ?: 0,
-                            amount = amount.takeIf { it.isNotBlank() }
+                            amount = amount.takeIf { it.isNotBlank() },
+                            pageId = existingButton?.pageId ?: 1
                         )
 
                         if (existingButton != null) {

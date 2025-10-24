@@ -3,12 +3,15 @@ package com.example.buttons.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -27,11 +30,13 @@ import androidx.compose.ui.unit.sp
 import com.example.buttons.R
 import com.example.buttons.data.ButtonEntity
 import com.example.buttons.data.ButtonSize
+import com.example.buttons.data.PageEntity
 import com.example.buttons.data.PaymentType
 import com.example.buttons.viewmodel.ButtonViewModel
+import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     viewModel: ButtonViewModel,
@@ -39,15 +44,44 @@ fun HomeScreen(
     onNavigateToAbout: () -> Unit,
     onEditButton: (ButtonEntity?) -> Unit
 ) {
-    val buttons by viewModel.buttons.collectAsState()
+    val buttonsByPage by viewModel.buttonsByPage.collectAsState()
+    val pages by viewModel.pages.collectAsState()
+    val currentPageId by viewModel.currentPageId.collectAsState()
     val isEditMode by viewModel.isEditMode.collectAsState()
     val buttonFontSize by viewModel.buttonFontSize.collectAsState()
     val wallpaperEnabled by viewModel.wallpaperEnabled.collectAsState()
     val backgroundColor by viewModel.backgroundColor.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
     var showPaymentDialog by remember { mutableStateOf(false) }
+    var showPageDialog by remember { mutableStateOf(false) }
+    var showDeletePageDialog by remember { mutableStateOf(false) }
+    var pageToDelete by remember { mutableStateOf<PageEntity?>(null) }
     var pendingButton by remember { mutableStateOf<ButtonEntity?>(null) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { pages.size.coerceAtLeast(1) }
+    )
+
+    LaunchedEffect(pagerState.currentPage, pages) {
+        if (pages.isNotEmpty() && pagerState.currentPage < pages.size) {
+            val selectedPage = pages[pagerState.currentPage]
+            if (selectedPage.id != currentPageId) {
+                viewModel.setCurrentPage(selectedPage.id)
+            }
+        }
+    }
+
+    LaunchedEffect(currentPageId, pages) {
+        if (pages.isNotEmpty()) {
+            val targetIndex = pages.indexOfFirst { it.id == currentPageId }
+            if (targetIndex >= 0 && targetIndex != pagerState.currentPage) {
+                pagerState.scrollToPage(targetIndex)
+            }
+        }
+    }
 
     val bgColor = try {
         Color(android.graphics.Color.parseColor(backgroundColor))
@@ -111,6 +145,18 @@ fun HomeScreen(
                                 Icon(Icons.Default.Info, contentDescription = null)
                             }
                         )
+                        if (isEditMode) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.manage_pages)) },
+                                onClick = {
+                                    showMenu = false
+                                    showPageDialog = true
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Menu, contentDescription = null)
+                                }
+                            )
+                        }
                     }
                 }
             )
@@ -123,47 +169,71 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-        if (buttons.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(R.string.no_buttons_yet), style = MaterialTheme.typography.headlineMedium)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    if (isEditMode) {
-                        Text(stringResource(R.string.tap_plus_to_add), style = MaterialTheme.typography.bodyMedium)
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            if (pages.isNotEmpty()) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.weight(1f)
+                ) { pageIndex ->
+                    val currentPage = pages.getOrNull(pageIndex)
+                    val pageButtons = currentPage?.let { buttonsByPage[it.id] } ?: emptyList()
+                    
+                    if (pageButtons.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(stringResource(R.string.no_buttons_yet), style = MaterialTheme.typography.headlineMedium)
+                                Spacer(modifier = Modifier.height(16.dp))
+                                if (isEditMode) {
+                                    Text(stringResource(R.string.tap_plus_to_add), style = MaterialTheme.typography.bodyMedium)
+                                } else {
+                                    Text(stringResource(R.string.enable_edit_mode), style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                        }
                     } else {
-                        Text(stringResource(R.string.enable_edit_mode), style = MaterialTheme.typography.bodyMedium)
+                        if (isEditMode) {
+                            EditableButtonGrid(
+                                buttons = pageButtons,
+                                viewModel = viewModel,
+                                onEditButton = onEditButton,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            ButtonGrid(
+                                buttons = pageButtons,
+                                onButtonClick = { button ->
+                                    if (button.paymentType == PaymentType.USER_CHOICE) {
+                                        pendingButton = button
+                                        showPaymentDialog = true
+                                    } else {
+                                        val deeplink = buildDeeplink(button, null)
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deeplink))
+                                        context.startActivity(intent)
+                                    }
+                                },
+                                fontSize = buttonFontSize,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 }
-            }
-        } else {
-            if (isEditMode) {
-                EditableButtonGrid(
-                    buttons = buttons,
-                    viewModel = viewModel,
-                    onEditButton = onEditButton,
-                    modifier = Modifier.padding(padding)
-                )
-            } else {
-                ButtonGrid(
-                    buttons = buttons,
-                    onButtonClick = { button ->
-                        if (button.paymentType == PaymentType.USER_CHOICE) {
-                            pendingButton = button
-                            showPaymentDialog = true
-                        } else {
-                            val deeplink = buildDeeplink(button, null)
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deeplink))
-                            context.startActivity(intent)
-                        }
-                    },
-                    fontSize = buttonFontSize,
-                    modifier = Modifier.padding(padding)
-                )
+                
+                if (pages.size > 1) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.page_indicator, pagerState.currentPage + 1, pages.size),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             }
         }
         
@@ -181,6 +251,55 @@ fun HomeScreen(
                     }
                     showPaymentDialog = false
                     pendingButton = null
+                }
+            )
+        }
+
+        if (showPageDialog) {
+            PageManagementDialog(
+                pages = pages,
+                currentPageId = currentPageId,
+                onDismiss = { showPageDialog = false },
+                onAddPage = { viewModel.addPage(it) },
+                onDeletePage = { page ->
+                    pageToDelete = page
+                    showDeletePageDialog = true
+                },
+                onSelectPage = { page ->
+                    scope.launch {
+                        val index = pages.indexOf(page)
+                        if (index >= 0) {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    }
+                    showPageDialog = false
+                }
+            )
+        }
+
+        if (showDeletePageDialog && pageToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDeletePageDialog = false },
+                title = { Text(stringResource(R.string.delete_page)) },
+                text = { Text(stringResource(R.string.delete_page_confirm)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            pageToDelete?.let { viewModel.deletePage(it) }
+                            showDeletePageDialog = false
+                            pageToDelete = null
+                        }
+                    ) {
+                        Text(stringResource(R.string.confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { 
+                        showDeletePageDialog = false 
+                        pageToDelete = null
+                    }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
             )
         }
@@ -563,4 +682,115 @@ private fun buildDeeplink(button: ButtonEntity, userSelectedType: PaymentType?):
             "&parcels=${button.parcels}" +
             "&type=$typeParam" +
             amountParam
+}
+
+@Composable
+fun PageManagementDialog(
+    pages: List<PageEntity>,
+    currentPageId: Long,
+    onDismiss: () -> Unit,
+    onAddPage: (String) -> Unit,
+    onDeletePage: (PageEntity) -> Unit,
+    onSelectPage: (PageEntity) -> Unit
+) {
+    var showAddDialog by remember { mutableStateOf(false) }
+    var newPageName by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.manage_pages)) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                pages.forEach { page ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (page.id == currentPageId) 
+                                MaterialTheme.colorScheme.primaryContainer 
+                            else 
+                                MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = page.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Row {
+                                IconButton(onClick = { onSelectPage(page) }) {
+                                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.edit))
+                                }
+                                if (pages.size > 1) {
+                                    IconButton(onClick = { onDeletePage(page) }) {
+                                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = { showAddDialog = true }) {
+                Text(stringResource(R.string.add_page))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+
+    if (showAddDialog) {
+        AlertDialog(
+            onDismissRequest = { 
+                showAddDialog = false
+                newPageName = ""
+            },
+            title = { Text(stringResource(R.string.add_page)) },
+            text = {
+                OutlinedTextField(
+                    value = newPageName,
+                    onValueChange = { newPageName = it },
+                    label = { Text(stringResource(R.string.page_name)) },
+                    placeholder = { Text(stringResource(R.string.page_name_hint)) },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newPageName.isNotBlank()) {
+                            onAddPage(newPageName)
+                            showAddDialog = false
+                            newPageName = ""
+                        }
+                    },
+                    enabled = newPageName.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.create_page))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showAddDialog = false
+                    newPageName = ""
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }

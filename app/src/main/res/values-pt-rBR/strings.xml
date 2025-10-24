@@ -52,4 +52,17 @@
     <string name="home_background_hint">Escolha o estilo de fundo para a tela inicial</string>
     <string name="background_color">Cor de Fundo</string>
     <string name="background_wallpaper">Papel de Parede</string>
+    
+    <!-- Pages -->
+    <string name="manage_pages">Gerenciar Páginas</string>
+    <string name="add_page">Adicionar Página</string>
+    <string name="delete_page">Excluir Página</string>
+    <string name="edit_page">Editar Página</string>
+    <string name="page_name">Nome da Página</string>
+    <string name="page_name_hint">Digite o nome da página</string>
+    <string name="create_page">Criar Página</string>
+    <string name="update_page">Atualizar Página</string>
+    <string name="delete_page_confirm">Tem certeza de que deseja excluir esta página? Todos os botões desta página serão excluídos.</string>
+    <string name="confirm">Confirmar</string>
+    <string name="page_indicator">Página %1$d de %2$d</string>
 </resources>

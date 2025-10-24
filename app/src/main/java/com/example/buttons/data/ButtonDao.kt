@@ -8,6 +8,9 @@ interface ButtonDao {
     @Query("SELECT * FROM buttons ORDER BY position ASC")
     fun getAllButtons(): Flow<List<ButtonEntity>>
 
+    @Query("SELECT * FROM buttons WHERE pageId = :pageId ORDER BY position ASC")
+    fun getButtonsByPage(pageId: Long): Flow<List<ButtonEntity>>
+
     @Query("SELECT * FROM buttons WHERE id = :id")
     suspend fun getButtonById(id: Long): ButtonEntity?
 
