@@ -1,7 +1,7 @@
 package com.example.buttons.ui
 
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import com.example.buttons.R
 import com.example.buttons.data.ButtonEntity
 import com.example.buttons.data.ButtonSize
@@ -169,7 +170,9 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)) {
             if (pages.isNotEmpty()) {
                 HorizontalPager(
                     state = pagerState,
@@ -221,9 +224,7 @@ fun HomeScreen(
                                             pendingButton = button
                                             showPaymentDialog = true
                                         } else {
-                                            val deeplink = buildDeeplink(button, null)
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deeplink))
-                                            context.startActivity(intent)
+                                            makePayment(button, context)
                                         }
                                     },
                                     fontSize = buttonFontSize,
@@ -258,9 +259,7 @@ fun HomeScreen(
                 },
                 onSelectPaymentType = { selectedType ->
                     pendingButton?.let { button ->
-                        val deeplink = buildDeeplink(button, selectedType)
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deeplink))
-                        context.startActivity(intent)
+                        makePayment(button, context, selectedType)
                     }
                     showPaymentDialog = false
                     pendingButton = null
@@ -321,6 +320,18 @@ fun HomeScreen(
         }
     }
     }
+}
+
+private fun makePayment(
+    button: ButtonEntity,
+    context: Context,
+    selectedType: PaymentType? = null
+) {
+    val deeplinkUri = button.getDeeplinkUri(selectedType)
+    val intent = Intent(Intent.ACTION_VIEW)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    intent.data = deeplinkUri
+    startActivity(context, intent, null)
 }
 
 @Composable
@@ -414,7 +425,7 @@ fun ButtonItem(
     val height = when (button.size) {
         ButtonSize.SMALL -> 80.dp
         ButtonSize.NORMAL -> 120.dp
-        ButtonSize.BIG -> 160.dp
+        ButtonSize.BIG -> 180.dp
     }
 
     Button(
@@ -438,7 +449,7 @@ fun ButtonItem(
             ) {
                 if (button.amount != null) {
                     Text(
-                        text = button.amount,
+                        text = button.amount.replace(".", ","),
                         style = when (button.size) {
                             ButtonSize.SMALL -> MaterialTheme.typography.titleLarge
                             ButtonSize.NORMAL -> MaterialTheme.typography.headlineMedium
@@ -487,9 +498,9 @@ fun ButtonItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = when (button.paymentType) {
-                        PaymentType.CREDIT -> "Credit"
-                        PaymentType.DEBIT -> "Debit"
-                        PaymentType.USER_CHOICE -> "User Choice"
+                        PaymentType.CREDIT -> "C"
+                        PaymentType.DEBIT -> "D"
+                        PaymentType.USER_CHOICE -> ""
                     },
                     style = when (button.size) {
                         ButtonSize.SMALL -> MaterialTheme.typography.bodySmall
@@ -684,21 +695,6 @@ fun PaymentTypeDialog(
             }
         }
     )
-}
-
-private fun buildDeeplink(button: ButtonEntity, userSelectedType: PaymentType?): String {
-//    val baseUrl = "https://example.com/payment"
-//    val typeParam = when (userSelectedType ?: button.paymentType) {
-//        PaymentType.CREDIT -> "credit"
-//        PaymentType.DEBIT -> "debit"
-//        PaymentType.USER_CHOICE -> "user_choice"
-//    }
-//    val amountParam = button.amount?.let { "&amount=${Uri.encode(it)}" } ?: ""
-//    return "$baseUrl?title=${Uri.encode(button.title)}" +
-//            "&parcels=${button.parcels}" +
-//            "&type=$typeParam" +
-//            amountParam
-    return "payment-app://pay?return_scheme=deeplinktest&transaction_type=CREDIT"
 }
 
 @OptIn(ExperimentalFoundationApi::class)

@@ -16,7 +16,16 @@
             android:theme="@style/Theme.Buttons">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="pay-response" android:scheme="pay-response/scheme_return" />
+                <data android:host="cancel" android:scheme="cancel/scheme_return" />
+                <data android:host="print" android:scheme="print/scheme_return" />
+                <data android:host="reprint" android:scheme="reprint/scheme_return" />
             </intent-filter>
         </activity>
     </application>

@@ -23,6 +23,10 @@ import com.example.buttons.data.ButtonEntity
 import com.example.buttons.data.ButtonSize
 import com.example.buttons.data.PaymentType
 import com.example.buttons.viewmodel.ButtonViewModel
+import java.math.BigDecimal
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,27 +160,36 @@ fun EditButtonScreen(
 
             Button(
                 onClick = {
-                    if (title.isNotBlank()) {
-                        val button = ButtonEntity(
-                            id = existingButton?.id ?: 0,
-                            title = title,
-                            subtitle = subtitle,
-                            parcels = parcels,
-                            paymentType = paymentType,
-                            color = selectedColor,
-                            size = buttonSize,
-                            position = existingButton?.position ?: 0,
-                            amount = amount.takeIf { it.isNotBlank() },
-                            pageId = existingButton?.pageId ?: 1
-                        )
+                    val button = ButtonEntity(
+                        id = existingButton?.id ?: 0,
+                        title = title,
+                        subtitle = subtitle,
+                        parcels = parcels,
+                        paymentType = paymentType,
+                        color = selectedColor,
+                        size = buttonSize,
+                        position = existingButton?.position ?: 0,
+                        amount = (amount.takeIf { it.isNotBlank() })?.let {
+                            if (it.contains(",") || it.contains(".")) {
+                                val amountBigDecimal = BigDecimal(it.replace(",", "."))
+                                val decimalFormat = DecimalFormat(
+                                    "0.00",
+                                    DecimalFormatSymbols(Locale.US)
+                                ) // Use Locale.US for dot separator
+                                decimalFormat.format(amountBigDecimal)
+                            } else {
+                                it
+                            }
+                        },
+                        pageId = existingButton?.pageId ?: 1
+                    )
 
-                        if (existingButton != null) {
-                            viewModel.updateButton(button)
-                        } else {
-                            viewModel.addButton(button)
-                        }
-                        onNavigateBack()
+                    if (existingButton != null) {
+                        viewModel.updateButton(button)
+                    } else {
+                        viewModel.addButton(button)
                     }
+                    onNavigateBack()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = title.isNotBlank()
